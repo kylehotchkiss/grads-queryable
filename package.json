@@ -1,0 +1,15 @@
+{
+  "name": "grads-queryable",
+  "version": "1.0.0",
+  "description": "Queryable instance of grads data for predictors and stuff ",
+  "main": "index.js",
+  "dependencies": {
+    "grads": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
