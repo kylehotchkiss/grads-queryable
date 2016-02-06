@@ -6,6 +6,8 @@ It's focused around wind data, but could be used for other values if needed. (Ma
 
 _This is not flight path prediction software on its own - check out [fnstraj2](https://github.com/kylehotchkiss/fnstraj2) for that._
 
+
+
 ## How it works
 
 1. You initialize grads-queryable with your launch or starting coordinates
