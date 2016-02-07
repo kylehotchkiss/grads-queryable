@@ -4,7 +4,8 @@
   "description": "Queryable instance of grads data for predictors and stuff ",
   "main": "index.js",
   "dependencies": {
-    "grads": "^1.0.0"
+    "grads": "^1.0.0",
+    "lodash": "^4.2.1"
   },
   "devDependencies": {},
   "scripts": {
