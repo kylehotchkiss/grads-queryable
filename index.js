@@ -35,11 +35,11 @@ var nearest = function( num, arr ) {
 
 function GradsQ( lat, lon, alt, options ) {
     this.dataset = {};
-    this.altitudes = [];
+    this.keys = {};
 
     const defaults = {
         minutes: 60, // length of flight, minutes
-        model: 'gfs', // NOAA weather model (GFS/RAP)
+        model: 'rap', // NOAA weather model (GFS/RAP)
         variables: ['wind_u_prs', 'wind_v_prs'] // Variables
     };
 
@@ -49,21 +49,6 @@ function GradsQ( lat, lon, alt, options ) {
     this.search = ( timeOffset, lat, lon, alt ) => {
         var key;
 
-        // TODO: config argument for grads callback should provide the actual resolution
-        // if the dataset was simplified at all. This should only apply if you travel
-        // more than 12.5deg in GFS or 9.25deg in RAP (873 or 639 equator-miles respectively)
-        // Note: this needs to be fixed before using ultra high-res models
-        var modelOptions = this.model.options;
-        var resolution = modelOptions.resolution;
-        var resolution_x = modelOptions.resolution_x;
-        var resolution_y = modelOptions.resolution_y;
-        var resolution_z = modelOptions.resolution_y;
-
-        // Round to nearest location given resolution of model.
-        lat = Decimal( lat ).toNearest( resolution_x || resolution );
-        lon = Decimal( lon ).toNearest( resolution_y || resolution );
-        alt = nearest( Decimal( alt ), this.altitudes );
-
         // Figure out how many minutes a timeblock will represent
         var interval = ( this.model.steps.days / this.model.steps.time ) * 1440;
 
@@ -72,6 +57,13 @@ function GradsQ( lat, lon, alt, options ) {
 
         // Add the time block to the initial time
         time = ( ( time * interval ) * 60000 ) + this.time;
+
+        // Search for the nearest of each in the tables of keys
+        // TODO: Can simplify the above garbage time code
+        lat = nearest( Decimal( lat ), this.keys.lat );
+        lon = nearest( Decimal( lon ), this.keys.lon );
+        alt = nearest( Decimal( alt ), this.keys.lev ); // :troll:
+        time = nearest( time, this.keys.time);
 
         // Generate a key (TODO: altitude)
         if ( alt ) {
@@ -95,6 +87,8 @@ function GradsQ( lat, lon, alt, options ) {
         if ( results ) {
             callback( results );
         } else {
+            //console.log( timeOffset )
+            //console.log( lat, lon, alt  )
             //console.log('Out of bounds :( bye');
             // this.extend
         }
@@ -157,20 +151,15 @@ function GradsQ( lat, lon, alt, options ) {
         // to prevent fatal errors here for southern hemispheres
         var official = new Grads( corner[0] + ':' + lat, corner[1] + ':' + lon, alt, options.model );
 
-        official.bulkFetch( options.variables, () => {
+        official.bulkFetch( options.variables, ( values, config ) => {
             this.dataset = official.flatten();
             this.model = official.model;
-
-            for ( var i in this.dataset ) {
-                if ( this.altitudes.indexOf( this.dataset[i].alt ) === -1 ) {
-                    this.altitudes.push( this.dataset[i].alt );
-                }
-            }
+            this.keys = config.keys;
 
             // Figure out our first time so we can iterate properly
-            var firstKey = Object.keys(this.dataset)[0];
+            //var firstKey = Object.keys(this.dataset)[0];
 
-            this.time = +moment( this.dataset[ firstKey ].time ); // todo: this will be js time in the future
+            //this.time = +moment( this.dataset[ firstKey ].time ); // todo: this will be js time in the future
 
             // We should read all the values into redis or something?
 
