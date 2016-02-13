@@ -65,7 +65,11 @@ gradsQ.ready(function() {
 });
 ```
 
-
 ## Options / Defaults
 
 * This currently uses the GFS model.
+
+## Conventions
+
+* Times are stored as minutes
+* Distances are stored as meters

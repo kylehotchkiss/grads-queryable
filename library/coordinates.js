@@ -10,7 +10,7 @@ exports.travel = function( frame, distance, heading ) {
     //////////////////////////////////////////////////////
 
     heading = heading * RADIANS;
-    distance = distance * RADIANS;    
+    distance = distance * RADIANS;
 
     var radius = (6367500 + frame[2]) * RADIANS;
     var oldLat = frame[0] * RADIANS;
