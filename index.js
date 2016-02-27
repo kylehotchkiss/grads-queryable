@@ -2,11 +2,9 @@
 
 var _ = require('lodash');
 var Grads = require('grads');
-var moment = require('moment');
 var Decimal = require('decimal.js');
 var coordinates = require('./library/coordinates.js');
 var calculations = require('./library/calculations.js');
-
 
 var remap = function( value, from, to, strict ) {
     var result = to[0] + ( value - from[0] ) * ( to[1] - to[0] ) / ( from[1] - from[0] );
@@ -131,8 +129,6 @@ function GradsQ( lat, lon, alt, options ) {
             }
         }
 
-        // Can we run a sample.clean(); to remove any unneeded data?
-
         // Figure out rough distance + heading if we're using wind
         if ( typeof averages.wind_u_prs !== 'undefined' && averages.wind_v_prs !== 'undefined' ) {
             var wind = calculations.wind( averages.wind_u_prs, averages.wind_v_prs ); // m/s
@@ -141,13 +137,9 @@ function GradsQ( lat, lon, alt, options ) {
             // Then multiply by 50% so we can have a better sized bounding box
             distance = (( wind.speed * 60 ) * options.minutes ) * 5;
             corner = coordinates.travel( [ lat, lon, 609.6 ], distance, wind.heading );
-
-            //} else {
-            // How do we calculate estimated distance for other vars ?????
         }
 
         // Make our official request with projected boundaries
-        // NOTE: this assumes East->West travel - will need to handle flipping ranges in Grads
         // to prevent fatal errors here for southern hemispheres
         var official = new Grads( corner[0] + ':' + lat, corner[1] + ':' + lon, alt, options.model );
 
@@ -155,13 +147,6 @@ function GradsQ( lat, lon, alt, options ) {
             this.dataset = official.flatten();
             this.model = official.model;
             this.keys = config.keys;
-
-            // Figure out our first time so we can iterate properly
-            //var firstKey = Object.keys(this.dataset)[0];
-
-            //this.time = +moment( this.dataset[ firstKey ].time ); // todo: this will be js time in the future
-
-            // We should read all the values into redis or something?
 
             this.next();
         });

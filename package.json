@@ -1,13 +1,13 @@
 {
   "name": "grads-queryable",
-  "version": "1.0.0",
-  "description": "Queryable instance of grads data for predictors and stuff ",
+  "version": "0.1.0",
+  "description": "Queryable instance of grads (https://github.com/kylehotchkiss/grads) data for predictors and stuff ",
   "main": "index.js",
   "dependencies": {
     "async": "^1.5.2",
     "decimal.js": "^5.0.3",
     "geojson": "^0.2.1",
-    "grads": "^1.0.0",
+    "grads": "^0.3.1",
     "lodash": "^4.2.1",
     "moment": "^2.11.2",
     "openurl": "^1.1.1"
