@@ -10,7 +10,8 @@
     "grads": "^0.3.1",
     "lodash": "^4.2.1",
     "moment": "^2.11.2",
-    "openurl": "^1.1.1"
+    "openurl": "^1.1.1",
+    "request": "^2.69.0"
   },
   "devDependencies": {},
   "scripts": {
