@@ -9,31 +9,54 @@ var GradsQ = require('./index.js');
 var coordinates = require('./library/coordinates.js');
 var calculations = require('./library/calculations.js');
 
-var gradsQ = new GradsQ(26.9236127, 75.9134684, '111:1500', { minutes: 60, model: 'gfs' });
+var gradsQ = new GradsQ(37.4037, -79.1702, '111:5000', { minutes: 60, model: 'rap' });
 
 gradsQ.ready(function() {
 
     console.log('gradsQ is readY');
 
     var steps = _.range( 100 );
-    var path = [[ 75.9134684, 26.9236127 ]]; // GEOJSON: LON, LAT
+    var paths = {};
+    var path = [[ -79.1702, 37.4037 ]]; // GEOJSON: LON, LAT
+    var altitudes = [ 300, 600, 900, 1200, 1500, 1800, 2100, 2400, 2700 ];
 
-    async.each( steps, ( i, callback ) => {
-        var last = path[ path.length - 1 ];
+    async.each( altitudes, ( i, callback ) => {
+        var alt = i;
+        var myPath = _.clone( path );
 
-        //var alt = ( i / 100 ) * 13716; // imaginary climb
-        var alt = 600;
+        async.each( steps, ( j, callback ) => {
+            var last = myPath[ myPath.length - 1 ];
 
-        gradsQ.query( 1, last[1], last[0], alt, ( results ) => {
-            var wind = calculations.wind( results.wind_u_prs, results.wind_v_prs );
-            var next = coordinates.travel( [ last[1], last[0], 0 ], wind.speed * 60, wind.heading );
+            gradsQ.query( 1, last[1], last[0], alt, ( results ) => {
+                var wind = calculations.wind( results.wind_u_prs, results.wind_v_prs );
+                var next = coordinates.travel( [ last[1], last[0], 0 ], wind.speed * 60, wind.heading );
 
-            path.push([ next[1], next[0] ]);
+                myPath.push([ next[1], next[0] ]);
 
+                callback();
+            });
+        }, () => {
+            paths[ alt ] = myPath;
             callback();
         });
-    }, error => {
-        var map = JSON.stringify( GeoJSON.parse( [{ line: path }], { LineString: 'line' } ) );
+    }, () => {
+        var lines = [];
+
+        for ( var k in paths ) {
+            var path = paths[k];
+
+            lines.push({
+                name: k + 'm',
+                line: path,
+
+            });
+        }
+
+        var map = JSON.stringify( GeoJSON.parse( lines, { LineString: 'line', extra: {
+            style: {
+                color: "#FF0000"
+            }
+        } } ) );
 
         request({
             json: true,
@@ -55,9 +78,5 @@ gradsQ.ready(function() {
                 open( 'http://geojson.io/#id=gist:' + url );
             }
         });
-
-        // Oh?
-        //process.exit();
     });
-
 });
